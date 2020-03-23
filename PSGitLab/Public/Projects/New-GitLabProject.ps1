@@ -6,8 +6,10 @@ Function New-GitLabProject {
         [Parameter(Mandatory=$true)]
         [Alias('Path')]
         [string]$name,
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory=$true, ParameterSetName='namespace_name')]
         [string]$namespace,
+        [Parameter(Mandatory=$true, ParameterSetName='namespace_id')]
+        [string]$namespace_id,
         [string]$description,
         [switch]$issues_enabled,
         [switch]$merge_requests_enabled,
@@ -33,6 +35,10 @@ Function New-GitLabProject {
                 $PSBoundParameters.Remove('Namespace') | Out-Null
             } else {
                 throw "Error: No Namespace found"
+            }
+        } elseif ($PSBoundParameters.ContainsKey('Namespace_id')) {
+          $Body.Add('namespace_id', $namespace_id)
+          $PSBoundParameters.Remove('Namespace_id') | Out-Null
         }
 
         foreach($p in $PSBoundParameters.GetEnumerator()) {
@@ -55,7 +61,6 @@ Function New-GitLabProject {
         }
 
         QueryGitLabAPI -Request $Request -ObjectType 'GitLab.Project'
-        }
     }
     catch {
         Write-Error $_
